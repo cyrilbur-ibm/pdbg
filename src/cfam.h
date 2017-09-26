@@ -15,5 +15,4 @@
  */
 #include <inttypes.h>
 
-int getcfam(struct target *target, uint32_t index, uint64_t *addr, uint64_t *unused);
-int putcfam(struct target *target, uint32_t index, uint64_t *addr, uint64_t *data);
+int handle_cfams(int optind, int argc, char *argv[]);

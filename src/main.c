@@ -89,7 +89,8 @@ static struct {
 	const char *desc;
 	int (*fn)(int, int, char **);
 } actions[] = {
-	{ "none yet", "nothing", "placeholder", NULL },
+	{ "getcfam", "<address>", "Read system cfam", &handle_cfams },
+	{ "putcfam", "<address> <value> [<mask>]", "Write system cfam", &handle_cfams },
 };
 
 static void print_usage(char *pname)
@@ -150,19 +151,9 @@ enum command parse_cmd(char *optarg)
 {
 	cmd_max_arg_count = 0;
 
-	if (strcmp(optarg, "getcfam") == 0) {
-		cmd = GETCFAM;
-		cmd_min_arg_count = 1;
-	} else if (strcmp(optarg, "getscom") == 0) {
+	if (strcmp(optarg, "getscom") == 0) {
 		cmd = GETSCOM;
 		cmd_min_arg_count = 1;
-	} else if (strcmp(optarg, "putcfam") == 0) {
-		cmd = PUTCFAM;
-		cmd_min_arg_count = 2;
-		cmd_max_arg_count = 3;
-
-		/* No mask by default */
-		cmd_args[2] = -1ULL;
 	} else if (strcmp(optarg, "putscom") == 0) {
 		cmd = PUTSCOM;
 		cmd_min_arg_count = 2;
@@ -444,7 +435,7 @@ int for_each_child_target(char *class, struct target *parent,
 	return rc;
 }
 
-static int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2)
+int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2)
 {
 	return for_each_child_target(class, NULL, cb, arg1, arg2);
 }
@@ -669,12 +660,6 @@ int main(int argc, char *argv[])
 		return -1;
 
 	switch(cmd) {
-	case GETCFAM:
-		rc = for_each_target("fsi", getcfam, &cmd_args[0], NULL);
-		break;
-	case PUTCFAM:
-		rc = for_each_target("fsi", putcfam, &cmd_args[0], &cmd_args[1]);
-		break;
 	case GETSCOM:
 		rc = for_each_target("pib", getscom, &cmd_args[0], NULL);
 		break;

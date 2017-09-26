@@ -21,3 +21,5 @@
 int for_each_child_target(char *class, struct target *parent,
 				 int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *),
 				 uint64_t *arg1, uint64_t *arg2);
+
+int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2);
