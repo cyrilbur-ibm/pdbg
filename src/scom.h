@@ -17,5 +17,4 @@
 
 #include <target.h>
 
-int getscom(struct target *target, uint32_t index, uint64_t *addr, uint64_t *unused);
-int putscom(struct target *target, uint32_t index, uint64_t *addr, uint64_t *data);
+int handle_scoms(int optind, int argc, char *argv[]);
