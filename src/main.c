@@ -38,6 +38,7 @@
 #include "scom.h"
 #include "reg.h"
 #include "mem.h"
+#include "thread.h"
 
 #undef PR_DEBUG
 #define PR_DEBUG(...)
@@ -427,85 +428,6 @@ int for_each_child_target(char *class, struct target *parent,
 static int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2)
 {
 	return for_each_child_target(class, NULL, cb, arg1, arg2);
-}
-
-static int print_thread_status(struct target *thread_target, uint32_t index, uint64_t *status, uint64_t *unused1)
-{
-	struct thread *thread = target_to_thread(thread_target);
-
-	*status = SETFIELD(0xf << (index * 4), *status, thread_status(thread) & 0xf);
-	return 1;
-}
-
-static int print_chiplet_thread_status(struct target *chiplet_target, uint32_t index, uint64_t *unused, uint64_t *unused1)
-{
-	uint64_t status = -1UL;
-	int i, rc;
-
-	printf("c%02d:", index);
-	rc = for_each_child_target("thread", chiplet_target, print_thread_status, &status, NULL);
-	for (i = 0; i < 8; i++)
-		switch ((status >> (i * 4)) & 0xf) {
-		case THREAD_STATUS_ACTIVE:
-			printf(" A");
-			break;
-
-		case THREAD_STATUS_DOZE:
-		case THREAD_STATUS_QUIESCE | THREAD_STATUS_DOZE:
-			printf(" D");
-			break;
-
-		case THREAD_STATUS_NAP:
-		case THREAD_STATUS_QUIESCE | THREAD_STATUS_NAP:
-			printf(" N");
-			break;
-
-		case THREAD_STATUS_SLEEP:
-		case THREAD_STATUS_QUIESCE | THREAD_STATUS_SLEEP:
-			printf(" S");
-			break;
-
-		case THREAD_STATUS_ACTIVE | THREAD_STATUS_QUIESCE:
-			printf(" Q");
-			break;
-
-		case 0xf:
-			printf("  ");
-			break;
-
-		default:
-			printf(" U");
-			break;
-		}
-	printf("\n");
-
-	return rc;
-}
-
-static int print_proc_thread_status(struct target *pib_target, uint32_t index, uint64_t *unused, uint64_t *unused1)
-{
-	printf("\np%01dt: 0 1 2 3 4 5 6 7\n", index);
-	return for_each_child_target("chiplet", pib_target, print_chiplet_thread_status, NULL, NULL);
-};
-
-static int start_thread(struct target *thread_target, uint32_t index, uint64_t *unused, uint64_t *unused1)
-{
-	return ram_start_thread(thread_target) ? 0 : 1;
-}
-
-static int step_thread(struct target *thread_target, uint32_t index, uint64_t *count, uint64_t *unused1)
-{
-	return ram_step_thread(thread_target, *count) ? 0 : 1;
-}
-
-static int stop_thread(struct target *thread_target, uint32_t index, uint64_t *unused, uint64_t *unused1)
-{
-	return ram_stop_thread(thread_target) ? 0 : 1;
-}
-
-static int sreset_thread(struct target *thread_target, uint32_t index, uint64_t *unused, uint64_t *unused1)
-{
-	return ram_sreset_thread(thread_target) ? 0 : 1;
 }
 
 static void enable_dn(struct dt_node *dn)
