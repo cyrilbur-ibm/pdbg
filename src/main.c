@@ -36,6 +36,7 @@
 #include "bitutils.h"
 #include "cfam.h"
 #include "scom.h"
+#include "reg.h"
 
 #undef PR_DEBUG
 #define PR_DEBUG(...)
@@ -392,7 +393,7 @@ static bool parse_command(int argc, char *argv[])
 }
 
 /* Returns the sum of return codes. This can be used to count how many targets the callback was run on. */
-static int for_each_child_target(char *class, struct target *parent,
+int for_each_child_target(char *class, struct target *parent,
 				 int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *),
 				 uint64_t *arg1, uint64_t *arg2)
 {
@@ -485,75 +486,6 @@ static int print_proc_thread_status(struct target *pib_target, uint32_t index, u
 	printf("\np%01dt: 0 1 2 3 4 5 6 7\n", index);
 	return for_each_child_target("chiplet", pib_target, print_chiplet_thread_status, NULL, NULL);
 };
-
-#define REG_MEM -3
-#define REG_MSR -2
-#define REG_NIA -1
-#define REG_R31 31
-static void print_proc_reg(struct thread *thread, uint64_t reg, uint64_t value, int rc)
-{
-	int proc_index, chip_index, thread_index;
-
-	thread_index = thread->target.index;
-	chip_index = thread->target.dn->parent->target->index;
-	proc_index = thread->target.dn->parent->parent->target->index;
-	printf("p%d:c%d:t%d:", proc_index, chip_index, thread_index);
-
-	if (reg == REG_MSR)
-		printf("msr: ");
-	else if (reg == REG_NIA)
-		printf("nia: ");
-	else if (reg > REG_R31)
-		printf("spr%03" PRIu64 ": ", reg - REG_R31);
-	else if (reg >= 0 && reg <= 31)
-		printf("gpr%02" PRIu64 ": ", reg);
-
-	if (rc == 1) {
-		printf("Check threadstatus - not all threads on this chiplet are quiesced\n");
-	} else if (rc == 2)
-		printf("Thread in incorrect state\n");
-	else
-		printf("0x%016" PRIx64 "\n", value);
-}
-
-static int putprocreg(struct target *thread_target, uint32_t index, uint64_t *reg, uint64_t *value)
-{
-	struct thread *thread = target_to_thread(thread_target);
-	int rc;
-
-	if (*reg == REG_MSR)
-		rc = ram_putmsr(thread, *value);
-	else if (*reg == REG_NIA)
-		rc = ram_putnia(thread, *value);
-	else if (*reg > REG_R31)
-		rc = ram_putspr(thread, *reg - REG_R31, *value);
-	else if (*reg >= 0 && *reg <= 31)
-		rc = ram_putgpr(thread, *reg, *value);
-
-	print_proc_reg(thread, *reg, *value, rc);
-
-	return 0;
-}
-
-static int getprocreg(struct target *thread_target, uint32_t index, uint64_t *reg, uint64_t *unused)
-{
-	struct thread *thread = target_to_thread(thread_target);
-	int rc;
-	uint64_t value;
-
-	if (*reg == REG_MSR)
-		rc = ram_getmsr(thread, &value);
-	else if (*reg == REG_NIA)
-		rc = ram_getnia(thread, &value);
-	else if (*reg > REG_R31)
-		rc = ram_getspr(thread, *reg - REG_R31, &value);
-	else if (*reg >= 0 && *reg <= 31)
-		rc = ram_getgpr(thread, *reg, &value);
-
-	print_proc_reg(thread, *reg, value, rc);
-
-	return !rc;
-}
 
 #define PUTMEM_BUF_SIZE 1024
 static int putmem(uint64_t addr)
