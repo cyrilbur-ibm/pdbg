@@ -352,6 +352,7 @@ static bool parse_options(int argc, char *argv[])
 			exit(1);
 			break;
 
+		case '?':
 		case 'h':
 			opt_error = true;
 			break;
