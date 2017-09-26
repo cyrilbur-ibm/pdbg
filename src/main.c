@@ -34,6 +34,7 @@
 #include <config.h>
 
 #include "bitutils.h"
+#include "cfam.h"
 
 #undef PR_DEBUG
 #define PR_DEBUG(...)
@@ -423,26 +424,6 @@ static int for_each_child_target(char *class, struct target *parent,
 static int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2)
 {
 	return for_each_child_target(class, NULL, cb, arg1, arg2);
-}
-
-static int getcfam(struct target *target, uint32_t index, uint64_t *addr, uint64_t *unused)
-{
-	uint32_t value;
-
-	if (fsi_read(target, *addr, &value))
-		return 0;
-
-	printf("p%d:0x%x = 0x%08x\n", index, (uint32_t) *addr, value);
-
-	return 1;
-}
-
-static int putcfam(struct target *target, uint32_t index, uint64_t *addr, uint64_t *data)
-{
-	if (fsi_write(target, *addr, *data))
-		return 0;
-
-	return 1;
 }
 
 static int getscom(struct target *target, uint32_t index, uint64_t *addr, uint64_t *unused)
