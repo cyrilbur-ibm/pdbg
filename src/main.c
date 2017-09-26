@@ -26,6 +26,8 @@
 #include <limits.h>
 #include <inttypes.h>
 
+#include <ccan/array_size/array_size.h>
+
 #include <backend.h>
 #include <operations.h>
 #include <target.h>
@@ -80,6 +82,15 @@ static int threadsel[MAX_PROCESSORS][MAX_CHIPS][MAX_THREADS];
 #define for_each_chiplet(x) while(0)
 #define for_each_processor(x) while(0)
 #define for_each_cfam(x) while(0)
+
+static struct {
+	const char *name;
+	const char *args;
+	const char *desc;
+	int (*fn)(int, int, char **);
+} actions[] = {
+	{ "none yet", "nothing", "placeholder", NULL },
+};
 
 static void print_usage(char *pname)
 {
@@ -371,8 +382,17 @@ static bool parse_command(int argc, char *argv[])
 	bool opt_error = true;
 	char *endptr;
 
+	/*
+	 * In order to make the series changing this code cleaner,
+	 * this is going to happen gradually.
+	 * Eventually parse_command() will be deleted but so that this
+	 * can be done over multiple patches neatly remove the error
+	 * check here and print the usage later.
+	 * We'll just have a lie a bit for now.
+	 */
+	if (i >= argc || !parse_cmd(argv[i]))
+		return false;
 
-	opt_error = i == argc || !parse_cmd(argv[i]);
 	i++;
 	while (i < argc && !opt_error) {
 		if (cmd_arg_idx >= MAX_CMD_ARGS ||
@@ -626,12 +646,18 @@ void print_target(struct dt_node *dn, int level)
 
 int main(int argc, char *argv[])
 {
-	int rc = 0;
+	int i, rc = 0;
 	uint8_t *buf;
 	struct target *target;
+	bool found = true;
 
 	if (parse_options(argc, argv))
 		return 1;
+
+	if (optind >= argc) {
+		print_usage(argv[0]);
+		return 1;
+	}
 
 	/* Disable unselected targets */
 	if (target_select())
@@ -753,8 +779,22 @@ int main(int argc, char *argv[])
 		rc = run_htm_analyse();
 		break;
 	default:
-		PR_ERROR("Unsupported command\n");
+		found = false;
 		break;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(actions); i++) {
+		if (strcmp(argv[optind], actions[i].name) == 0) {
+			found = true;
+			rc = actions[i].fn(optind, argc, argv);
+			break;
+		}
+	}
+
+	if (!found) {
+		PR_ERROR("Unsupported command: %s\n", argv[optind]);
+		print_usage(argv[0]);
+		return 1;
 	}
 
 	if (rc <= 0) {
