@@ -83,6 +83,8 @@ static int threadsel[MAX_PROCESSORS][MAX_CHIPS][MAX_THREADS];
 #define for_each_processor(x) while(0)
 #define for_each_cfam(x) while(0)
 
+static int handle_probe(int optind, int argc, char *argv[]);
+
 static struct {
 	const char *name;
 	const char *args;
@@ -115,6 +117,7 @@ static struct {
 	{ "htm_dump", "", "Dump HTM buffer to file", &run_htm_dump },
 	{ "htm_trace", "" , "Configure and start tracing with HTM", &run_htm_trace },
 	{ "htm_analyse", "", "Stop and dump buffer to file", &run_htm_analyse },
+	{ "probe", "", "", &handle_probe },
 };
 
 static void print_usage(char *pname)
@@ -580,6 +583,15 @@ void print_target(struct dt_node *dn, int level)
 		print_target(next, level + 1);
 }
 
+static int handle_probe(int optind, int argc, char *argv[])
+{
+	print_target(dt_root, 0);
+	printf("\nNote that only selected targets will be shown above. If none are shown\n"
+	       "try adding '-a' to select all targets\n");
+
+	return 1;
+}
+
 int main(int argc, char *argv[])
 {
 	int i, rc = 0;
@@ -603,12 +615,6 @@ int main(int argc, char *argv[])
 		return -1;
 
 	switch(cmd) {
-	case PROBE:
-		rc = 1;
-		print_target(dt_root, 0);
-		printf("\nNote that only selected targets will be shown above. If none are shown\n"
-		       "try adding '-a' to select all targets\n");
-		break;
 	default:
 		found = false;
 		break;
