@@ -100,6 +100,7 @@ static struct {
 	{ "htm_dump", "", "Dump HTM buffer to file", &run_htm_dump },
 	{ "htm_trace", "" , "Configure and start tracing with HTM", &run_htm_trace },
 	{ "htm_analyse", "", "Stop and dump buffer to file", &run_htm_analyse },
+	{ "htm", "(core | nest) (start | stop | status | reset | trace | analyse", "Hardware Trace Macro", &run_htm },
 	{ "probe", "", "", &handle_probe },
 };
 
