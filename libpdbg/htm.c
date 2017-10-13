@@ -166,6 +166,17 @@ struct htm_status {
 	uint64_t raw;
 };
 
+struct htm {
+	struct target target;
+	int (*start)(struct htm *);
+	int (*stop)(struct htm *);
+	int (*reset)(struct htm *, uint64_t *, uint64_t *);
+	int (*pause)(struct htm *);
+	int (*status)(struct htm *);
+	int (*dump)(struct htm *, uint64_t, const char *);
+};
+#define target_to_htm(x) container_of(x, struct htm, target)
+
 static struct htm *check_and_convert(struct target *target)
 {
 	if (strcmp(target->class, "nhtm"))
