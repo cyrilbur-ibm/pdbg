@@ -125,6 +125,7 @@ struct thread {
 
 void targets_init(void *fdt);
 void target_probe(void);
+bool target_is_class(struct target *target, const char *class);
 
 int pib_read(struct target *pib_dt, uint64_t addr, uint64_t *data);
 int pib_write(struct target *pib_dt, uint64_t addr, uint64_t data);

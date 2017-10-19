@@ -179,8 +179,10 @@ struct htm {
 
 static struct htm *check_and_convert(struct target *target)
 {
-	if (strcmp(target->class, "nhtm"))
-		return NULL;
+
+	if (!target_is_class(target, "nhtm") &&
+	    !target_is_class(target, "chtm"))
+	    return NULL;
 
 	return target_to_htm(target);
 }

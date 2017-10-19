@@ -350,3 +350,11 @@ void target_probe(void)
 	dt_for_each_node(dt_root, dn)
 		_target_probe(dn);
 }
+
+bool target_is_class(struct target *target, const char *class)
+{
+	if (!target || !target->class || !class)
+		return false;
+	return strcmp(target->class, class) == 0;
+}
+
