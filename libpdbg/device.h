@@ -167,6 +167,9 @@ struct dt_node *dt_find_compatible_node_on_chip(struct dt_node *root,
 /* Check status property */
 bool dt_node_is_enabled(struct dt_node *node);
 
+/* Check status property */
+bool dt_node_is_disabled(struct dt_node *node);
+
 /* Build the full path for a node. Return a new block of memory, caller
  * shall free() it
  */

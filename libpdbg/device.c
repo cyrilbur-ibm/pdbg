@@ -942,3 +942,13 @@ bool dt_node_is_enabled(struct dt_node *node)
 
 	return p->len > 1 && p->prop[0] == 'o' && p->prop[1] == 'k';
 }
+
+bool dt_node_is_disabled(struct dt_node *node)
+{
+	const struct dt_property *p = dt_find_property(node, "status");
+
+	if (!p)
+		return false;
+
+	return strcmp(p->prop, "disabled") == 0;
+}

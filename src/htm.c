@@ -50,7 +50,10 @@ int run_htm_start(int optind, int argc, char *argv[])
 	struct target *target;
 	int rc = 0;
 
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("Starting HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_start(target) != 1)
@@ -67,7 +70,10 @@ int run_htm_stop(int optind, int argc, char *argv[])
 	struct target *target;
 	int rc = 0;
 
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("Stopping HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_stop(target) != 1)
@@ -84,7 +90,10 @@ int run_htm_status(int optind, int argc, char *argv[])
 	struct target *target;
 	int rc = 0;
 
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_status(target) != 1)
@@ -103,7 +112,10 @@ int run_htm_reset(int optind, int argc, char *argv[])
 	struct target *target;
 	int rc = 0;
 
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("Resetting HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_reset(target, &base, &size) != 1)
@@ -135,7 +147,10 @@ int run_htm_dump(int optind, int argc, char *argv[])
 
 	/* size = 0 will dump everything */
 	printf("Dumping HTM trace to file [chip].[#]%s\n", filename);
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("Dumping HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_dump(target, 0, filename) == 1)
@@ -154,7 +169,10 @@ int run_htm_trace(int optind, int argc, char *argv[])
 	struct target *target;
 	int rc = 0;
 
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		/*
 		 * Don't mind if stop fails, it will fail if it wasn't
 		 * running, if anything bad is happening reset will fail
@@ -175,7 +193,10 @@ int run_htm_trace(int optind, int argc, char *argv[])
 		old_base = base;
 	}
 
-	for_each_class_target("htm", target) {
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("Starting HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_start(target) != 1)
@@ -193,8 +214,12 @@ int run_htm_analyse(int optind, int argc, char *argv[])
 	char *filename;
 	int rc = 0;
 
-	for_each_class_target("htm", target)
+	for_each_class_target("nhtm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		htm_stop(target);
+	}
 
 	filename = get_htm_dump_filename();
 	if (!filename)
@@ -202,6 +227,9 @@ int run_htm_analyse(int optind, int argc, char *argv[])
 
 	printf("Dumping HTM trace to file [chip].[#]%s\n", filename);
 	for_each_class_target("htm", target) {
+		if (dt_node_is_disabled(target->dn))
+			continue;
+
 		printf("Dumping HTM@%d#%d\n",
 			dt_get_chip_id(target->dn), target->index);
 		if (htm_dump(target, 0, filename) != 1)
