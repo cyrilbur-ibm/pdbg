@@ -13,15 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <inttypes.h>
 
-#include <target.h>
+#include "main.h"
 
-enum backend { FSI, I2C, KERNEL, FAKE, HOST };
+enum backend default_backend(void)
+{
+	return FAKE;
+}
 
-/* Returns the sum of return codes. This can be used to count how many targets the callback was run on. */
-int for_each_child_target(char *class, struct target *parent,
-				 int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *),
-				 uint64_t *arg1, uint64_t *arg2);
+bool backend_is_possible(enum backend backend)
+{
+	return backend == FAKE;
+}
 
-int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2);
+/* Theres no target for FAKE backend */
+const char *default_target(enum backend backend)
+{
+	return NULL;
+}
+
+/* Theres no device for FAKE backend */
+bool target_is_possible(enum backend backend, const char *target)
+{
+	return target == NULL;
+}

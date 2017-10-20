@@ -35,6 +35,7 @@
 
 #include <config.h>
 
+#include "main.h"
 #include "bitutils.h"
 #include "cfam.h"
 #include "scom.h"
@@ -42,11 +43,11 @@
 #include "mem.h"
 #include "thread.h"
 #include "htm.h"
+#include "options.h"
 
 #undef PR_DEBUG
 #define PR_DEBUG(...)
 
-enum backend { FSI, I2C, KERNEL, FAKE, HOST };
 static enum backend backend = KERNEL;
 
 static char const *device_node;
@@ -504,8 +505,25 @@ int main(int argc, char *argv[])
 {
 	int i, rc = 0;
 
+	backend = default_backend();
+	device_node = default_target(backend);
+
 	if (parse_options(argc, argv))
 		return 1;
+
+	if (!backend_is_possible(backend)) {
+		fprintf(stderr, "Backend not possible\n");
+		/* Probs say something about bad backend */
+		print_usage(argv[0]);
+		return 1;
+	}
+
+	if (!target_is_possible(backend, device_node)) {
+		fprintf(stderr, "Target not possible\n");
+		/* Probs say something about bad target */
+		print_usage(argv[0]);
+		return 1;
+	}
 
 	if (optind >= argc) {
 		print_usage(argv[0]);

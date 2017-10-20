@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <inttypes.h>
 
-#include <target.h>
+/* Default backend on this platform */
+enum backend default_backend(void);
 
-enum backend { FSI, I2C, KERNEL, FAKE, HOST };
+/* Is this backend possible on this platform */
+bool backend_is_possible(enum backend backend);
 
-/* Returns the sum of return codes. This can be used to count how many targets the callback was run on. */
-int for_each_child_target(char *class, struct target *parent,
-				 int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *),
-				 uint64_t *arg1, uint64_t *arg2);
+/* The default (perhaps only) target for this backend */
+const char *default_target(enum backend backend);
 
-int for_each_target(char *class, int (*cb)(struct target *, uint32_t, uint64_t *, uint64_t *), uint64_t *arg1, uint64_t *arg2);
+/*
+ * Does this platform backend support this target,
+ * there is an implied check of is_backend_possible()
+ */
+bool target_is_possible(enum backend backend, const char *target);

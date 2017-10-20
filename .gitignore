@@ -26,6 +26,7 @@ libpdbg.a
 .libs
 config.guess
 config.sub
+src/options.c
 *.la
 *.lo
 ltmain.sh
