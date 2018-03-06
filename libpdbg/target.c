@@ -300,7 +300,7 @@ void pdbg_targets_init(void *fdt)
 }
 
 /* Disable a node and all it's children */
-static void disable_node(struct dt_node *dn)
+static void deprobe(struct dt_node *dn)
 {
 	struct dt_node *next;
 	struct dt_property *p;
@@ -309,9 +309,9 @@ static void disable_node(struct dt_node *dn)
 	if (p)
 		dt_del_property(dn, p);
 
-	dt_add_property_string(dn, "status", "disabled");
+	dt_add_property_string(dn, "status", "nonexistant");
 	dt_for_each_child(dn, next)
-		disable_node(next);
+		deprobe(next);
 }
 
 static void _target_probe(struct dt_node *dn)
@@ -326,13 +326,13 @@ static void _target_probe(struct dt_node *dn)
 	}
 
 	p = dt_find_property(dn, "status");
-	if ((p && !strcmp(p->prop, "disabled")) || (dn->target->probe && (rc = dn->target->probe(dn->target)))) {
+	if ((p && (!strcmp(p->prop, "disabled") || !strcmp(p->prop, "nonexistant"))) || (dn->target->probe && (rc = dn->target->probe(dn->target)))) {
 		if (rc)
 			PR_DEBUG("not found\n");
 		else
 			PR_DEBUG("disabled\n");
 
-		disable_node(dn);
+		deprobe(dn);
 	} else {
 		PR_DEBUG("success\n");
 	}

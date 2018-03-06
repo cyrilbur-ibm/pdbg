@@ -9,7 +9,7 @@ struct pdbg_taget *pdbg_root_target;
 /* loops/iterators */
 struct pdbg_target *__pdbg_next_target(const char *klass, struct pdbg_target *parent, struct pdbg_target *last);
 struct pdbg_target *__pdbg_next_child_target(struct pdbg_target *parent, struct pdbg_target *last);
-enum pdbg_target_status {PDBG_TARGET_ENABLED, PDBG_TARGET_DISABLED, PDBG_TARGET_HIDDEN};
+enum pdbg_target_status {PDBG_TARGET_ENABLED, PDBG_TARGET_DISABLED, PDBG_TARGET_HIDDEN, PDBG_TARGET_NONEXISTANT};
 
 #define pdbg_for_each_target(class, parent, target)			\
 	for (target = __pdbg_next_target(class, parent, NULL);		\

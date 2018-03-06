@@ -269,7 +269,7 @@ int for_each_child_target(char *class, struct pdbg_target *parent,
 		index = pdbg_target_index(target);
 		assert(index != -1);
 		status = pdbg_target_status(target);
-		if (status == PDBG_TARGET_DISABLED || status == PDBG_TARGET_HIDDEN)
+		if (status == PDBG_TARGET_DISABLED || status == PDBG_TARGET_HIDDEN || status == PDBG_TARGET_NONEXISTANT)
 			continue;
 
 		rc += cb(target, index, arg1, arg2);
@@ -289,7 +289,7 @@ int for_each_target(char *class, int (*cb)(struct pdbg_target *, uint32_t, uint6
 		index = pdbg_target_index(target);
 		assert(index != -1);
 		status = pdbg_target_status(target);
-		if (status == PDBG_TARGET_DISABLED || status == PDBG_TARGET_HIDDEN)
+		if (status == PDBG_TARGET_DISABLED || status == PDBG_TARGET_HIDDEN || status == PDBG_TARGET_NONEXISTANT)
 			continue;
 
 		rc += cb(target, index, arg1, arg2);
@@ -420,7 +420,7 @@ void print_target(struct pdbg_target *target, int level)
 	enum pdbg_target_status status;
 
 	status = pdbg_target_status(target);
-	if (status == PDBG_TARGET_DISABLED)
+	if (status == PDBG_TARGET_DISABLED || status == PDBG_TARGET_NONEXISTANT)
 		return;
 
 	if (status == PDBG_TARGET_ENABLED) {

@@ -69,6 +69,8 @@ enum pdbg_target_status pdbg_target_status(struct pdbg_target *target)
 		return PDBG_TARGET_DISABLED;
 	else if (!strcmp(p->prop, "hidden"))
 		return PDBG_TARGET_HIDDEN;
+	else if (!strcmp(p->prop, "nonexistant"))
+		return PDBG_TARGET_NONEXISTANT;
 	else
 		assert(0);
 }
