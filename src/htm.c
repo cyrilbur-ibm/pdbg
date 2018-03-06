@@ -190,7 +190,7 @@ static int run_dump(enum htm_type type, int optind, int argc, char *argv[])
 		index = pdbg_target_index(target);
 		assert(!pdbg_get_u64_property(target, "chip-id", &chip_id));
 		printf("Dumping HTM@%" PRIu64 "#%d\n", chip_id, index);
-		if (htm_dump(target, 0, filename) == 1)
+		if (htm_dump(target, 0, filename) != 1)
 			printf("Couldn't dump HTM@%" PRIu64 "#%d\n", chip_id, index);
 		rc++;
 	}
